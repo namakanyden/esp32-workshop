@@ -173,7 +173,6 @@ Funkciu zapíšeme do súboru s menom `workshop.py`, v ktorom budeme náš scen�
 ```python
 from esp32 import hall_sensor
 
-
 def is_door_open():
     return hall_sensor() < 150
 ```
@@ -228,19 +227,32 @@ Aktuálnu pracovnú teplotu mikrokontroléra vieme odmerať zavolaním funkcie `
 117
 ```
 
-TODO: Zmeni sa pracovna teplota ak zmenim pracovnu frekvenciu mikrokontrolera?
-
 Hodnota, ktorú funkcia vráti je vo _Fahrenheitoch_. Ak ju chceme v stupňoch celzia, musíme ju skonvertovať podľa vzťahu:
 
 ```python
 temp_c = value  - 32 .0 / 1.8
 ```
 
-Pre naše potreby si teda vytvoríme samostatnú funkciu `get_temperature()`, ktorá nám vždy vráti hodnotu teploty už prevedenú na stupne celzia:
+Aj hodnoty teplomera môžeme vizualizovať pomocou plotter-a vypisovaním nameraných hodnôt v nekonečnej slučke. Nakoľko však pracovná teplota bude prevyšovať _40°C_, jej zmenu budeme dosahovať ťažšie. Mikrokontrolér napr. môžete skúsiť priložiť ku vetráku vášho laptopu.
+
+Pre potreby nášho scenára si vytvoríme samostatnú funkciu `get_temperature()`, ktorá nám vždy vráti hodnotu teploty už prevedenú na stupne celzia:
 
 ```python
+from esp32 import raw_temperature
+
 def get_temperature():
     return (raw_temperature() - 32.0) / 1.8
+```
+
+## Krok 7. Supperloop Update I.
+
+Našu hlavnú slučku môžeme aktualizovať vypísaním pracovnej teploty pri každej aktualizácii:
+
+```python
+while True:
+    ...
+    print(f'{get_temperature()}°C')
+	sleep(0.5)
 ```
 
 ## Krok x. Kapacitný senzor dotyku
@@ -323,13 +335,13 @@ def get_current_weather(location):
     return response.json()
 ```
 
-
-
-
-
 ## Ďalšie zdroje
 
 * [MicroPython](https://micropython.org/) - domovská stránka projektu _MicroPython_
 * [Quick reference for the ESP32](http://docs.micropython.org/en/latest/esp32/quickref.html) - Skrátená dokumentácia jazyka _MicroPython_ pre dosku s mikrokontrolérom _ESP32_.
 * [Random Nerd Tutorials](https://randomnerdtutorials.com/) - Portál venovaný nie len programovaniu mikrokontroléra _ESP32_ v jazyku _MicroPython_.
 * [ESP32 Labs](https://github.com/namakanyden/esp32-labs) - Niekoľko labov pre začiatočníkov v jazyku _MicroPython_ s mikrokontrolérom _ESP32_.
+
+## TODO
+
+* Zmeni sa pracovna teplota ak zmenim pracovnu frekvenciu mikrokontrolera?
