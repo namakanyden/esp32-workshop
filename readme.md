@@ -230,7 +230,7 @@ Aktuálnu pracovnú teplotu mikrokontroléra vieme odmerať zavolaním funkcie `
 Hodnota, ktorú funkcia vráti je vo _Fahrenheitoch_. Ak ju chceme v stupňoch celzia, musíme ju skonvertovať podľa vzťahu:
 
 ```python
-temp_c = value  - 32 .0 / 1.8
+temp_c = (value - 32.0) / 1.8
 ```
 
 Aj hodnoty teplomera môžeme vizualizovať pomocou plotter-a vypisovaním nameraných hodnôt v nekonečnej slučke. Nakoľko však pracovná teplota bude prevyšovať _40°C_, jej zmenu budeme dosahovať ťažšie. Mikrokontrolér napr. môžete skúsiť priložiť ku vetráku vášho laptopu.
