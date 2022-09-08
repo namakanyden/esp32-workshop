@@ -509,12 +509,67 @@ client.publish('pycon/sk/2022/mirek/door', str(int(door_state)))
 
 ## Krok 11. Stiahnutie informácií o počasí cez protokol HTTP
 
+Podľa scenára máme v prípade detekovania dotyku stiahnuť z internetu o počasí pre zadanú lokáciu. Využijeme na to REST API služby [openweathermap.org](https://www.openweathermap.org), s ktorou budeme komunikovať pomocou komunikačného protokolu HTTP. Na tento účel použijeme modul `urequests`, ktorý je mikro verziou známeho a populárneho balíčka v Pythone s názvom [`requests`]().
+
+Dopyt pre získanie aktuálneho počasia v _Bratislave_ v režime REPL bude vyzerať takto:
+
 ```python
-def get_current_weather(location):
-    url = f'http://api.openweathermap.org/data/2.5/weather?units=metric&q={location}&appid={settings.APPID}'
-    response = requests.get(url)
-    return response.json()
+>>> import urequests
+>>> url = 'http://api.openweathermap.org/data/2.5/weather?units=metric&q=bratislava&appid=XXX'
+>>> response = urequests.get(url)
 ```
+
+**Poznámka:** Kľúč pre prístup k REST API v požiadavke uvedený ako parameter `appid` je vytvorený len pre potreby tohto workshop-u. Po jeho skončení nebude fungovať. Pre získanie vlastného kľúča sa zdarma zaregistrujte na uvedenej službe.
+
+Následne sa môžeme pozrieť na výsledok nášho dopytu. HTTP stavový kód zobrazíme zapísaním:
+
+```python
+>>> response.status_code
+200
+```
+
+Dáta, ktoré sme získali pomocou dopytu, sa nachádzajú vo formáte JSON. Tie vieme skonvertovať na slovník zavolaním:
+
+```python
+>>> data = response.json()
+```
+
+Ich zobrazením uvidíme všetky údaje, ktoré sme získali zo služby:
+
+```python
+>>> print(data)
+```
+
+Pre zjednodušenie práce je v module `helpers.py` vytvorená funkcia `get_current_weather()`, ktorá pre zvolenú lokáciu vráti slovník len s názvom lokácie, kódom krajiny a aktuálnou teplotou. Funkcia vyzerá takto:
+
+```python
+import urequests
+
+def get_current_weather(location):
+    appid = ''
+    url = f'http://api.openweathermap.org/data/2.5/weather?units=metric&q={location}&appid={appid}'
+    response = urequests.get(url)
+    data = response.json()
+    return {
+        'location': data['name'],
+        'country': data['sys']['country'],
+        'temp': data['main']['temp']
+    }
+```
+
+Funkcia sa dá vyskúšať jednoducho z REPL režimu takto:
+
+```python
+>>> from helpers import get_current_weather
+>>> get_current_weather('bratislava')
+{
+    
+}
+```
+
+## Krok 12. Publikovanie informácií o počasí po detekovaní dotyku
+
+
 
 ## Ďalšie zdroje
 
