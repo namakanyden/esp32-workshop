@@ -165,18 +165,26 @@ while True:
 
 ![Vykreslenie priebehu hodnôt z hallovho senzora](images/hall.sensor-plotter.png)
 
-V našom scenári budeme _hallov senzor_ používať ako senzor otvorených dverí. Vytvoríme preto funkciu `is_door_open()`, ktorá nám na základe veľkosti magnetického poľa vráti aktuálny stav dveri:
+V našom scenári budeme _hallov senzor_ používať ako senzor otvorených dverí. Pre tento účel máme v súbore `helpers.py` vytvorenú  funkciu `is_door_open()`, ktorá nám na základe veľkosti magnetického poľa vráti aktuálny stav dveri:
 
 * vráti hodnotu `True`, ak sú dvere otvorené (v tomto prípade senzor vráti nízku hodnotu), alebo
 * vráti hodnotu `False`, ak sú dvere zatvorené (v tomto prípade senzor vráti vysokú hodnotu).
 
-Funkciu zapíšeme do súboru s menom `workshop.py`, v ktorom budeme náš scenár programovať:
+Funkcia je veľmi jednoduchá a vyzerá takto:
 
 ```python
 from esp32 import hall_sensor
 
 def is_door_open():
     return hall_sensor() < 150
+```
+
+Vyskúšať ju môžete priamo v REPL režime takto:
+
+```python
+>>> from helpers import is_door_open
+>>> is_door_open()
+True
 ```
 
 **Poznámka:** Hodnotu, pri ktorej budeme považovať dvere za zatvorené, si musí každý nastaviť sám, nakoľko citlivosť senzora a sila použitého magnetu môže byť na rozličných zariadeniach iná.
@@ -190,9 +198,7 @@ from esp32 import hall_sensor
 from machine import Pin
 from time import sleep
 
-
-def is_door_open():
-    return hall_sensor() < 100
+from helpers import is_door_open
 
 
 if __name__ == '__main__':
@@ -237,13 +243,21 @@ temp_c = (value - 32.0) / 1.8
 
 Aj hodnoty teplomera môžeme vizualizovať pomocou plotter-a vypisovaním nameraných hodnôt v nekonečnej slučke. Nakoľko však pracovná teplota bude prevyšovať _40°C_, jej zmenu budeme dosahovať ťažšie. Mikrokontrolér napr. môžete skúsiť priložiť ku vetráku vášho laptopu.
 
-Pre potreby nášho scenára si vytvoríme samostatnú funkciu `get_temperature()`, ktorá nám vždy vráti hodnotu teploty už prevedenú na stupne celzia:
+Pre potreby nášho scenára sa v module `helpers.py` nachádza funkcia `get_temperature()`, ktorá nám vždy vráti hodnotu teploty už prevedenú na stupne celzia. Funkcia je veľmi jednoduchá a vyzerá takto:
 
 ```python
 from esp32 import raw_temperature
 
 def get_temperature():
     return (raw_temperature() - 32.0) / 1.8
+```
+
+Jej správanie si môžete overiť priamo v REPL režime napríklad takto:
+
+```python
+>>> from helpers import get_temperature
+>>> get_temperature()
+46.66667
 ```
 
 ## Krok 7. Supperloop Update I.
@@ -282,11 +296,22 @@ while True:
     sleep(0.5)
 ```
 
-Pre potrebu nášho scenára si vytvoríme pomocnú funkciu `was_touch()`, ktorá vráti hodnotu `True`, ak bol detekovaný pohyb. V opačnom prípade vráti hodnotu `False`.
+Pre potrebu nášho scenára sa v module `helpers.py` nachádza funkcia `was_touch()`, ktorá vráti hodnotu `True`, ak bol detekovaný dotyk na zvolenom pin-e. V opačnom prípade vráti hodnotu `False`. Parametrom tejto funkcie je číslo pin-u, na ktorom chcete detekovať dotyk (v našom prípade je to pin č. `14`). Funkcia je veľmi jednoduchá a jej kód vyzerá takto:
 
 ```python
-def was_touch(touch_pad):
-    return tp.read() < 50
+from machine import TouchPad, Pin
+
+def was_touch(pin):
+    touchpad = TouchPad(Pin(pin))
+    return touchpad.read() < 50
+```
+
+Správanie funkcie si môžete overiť priamo v REPL režime napríklad takto:
+
+```python
+>>> from helpers import was_touch(pin)
+>>> was_touch(14)
+False
 ```
 
 ## Krok 9. Superloop Update II.
@@ -300,18 +325,7 @@ from esp32 import hall_sensor, raw_temperature
 from machine import Pin, TouchPad
 from time import sleep
 
-
-def is_door_open():
-    return hall_sensor() < 100
-
-
-def get_temperature():
-    return (raw_temperature() - 32.0) / 1.8
-
-
-def was_touch(touch_pad):
-    return tp.read() < 50
-
+from he
 
 if __name__ == '__main__':
     # init door
@@ -394,7 +408,7 @@ Ak máme správny názov siete a rovnako tak máme prístupové heslo do siete, 
 
 V tomto momente sme úspešne pripojení s našim mikrokontrolérom do WiFi siete.
 
-## Krok X. MQTT
+## Krok 9. Publikovanie teploty cez protokol MQTT
 
 HiveMQ Web Client: http://www.hivemq.com/demos/websocket-client/
 
@@ -407,7 +421,7 @@ client.connect()
 client.publish('pycon/sk/2022/mirek/door', str(int(door_state)))
 ```
 
-## Krok X. HTTP
+## Krok 10. Stiahnutie informácií o počasí cez protokol HTTP
 
 ```python
 def get_current_weather(location):
