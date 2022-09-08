@@ -569,7 +569,13 @@ Funkcia sa dá vyskúšať jednoducho z REPL režimu takto:
 
 ## Krok 12. Publikovanie informácií o počasí po detekovaní dotyku
 
+V module `workshop.py` nájdeme miesto, kde po detekcii dotyku vypisujeme do konzoly text. Miesto funkcie `print()` vložíme tento fragment kódu:
 
+```python
+if touch_state is True:
+    data = get_current_weather('bratislava')
+    print(f'>> Aktuálna teplota v lokácii {data['location']} ({data['country']}) je {data.temp}°C.')
+```
 
 ## Ďalšie zdroje
 
