@@ -2,7 +2,7 @@ from esp32 import hall_sensor
 from machine import Pin
 from time import sleep
 
-from helpers import is_door_open
+from helpers import is_door_open, was_touch, get_temperature
 
 
 if __name__ == '__main__':
@@ -12,6 +12,9 @@ if __name__ == '__main__':
     # init led
     led = Pin(32, Pin.OUT, Pin.PULL_DOWN)
     led.value(door_state)
+    
+    # init touchpad
+    touch_state = was_touch(14)
 
     while True:
         # check state of the door
@@ -23,5 +26,15 @@ if __name__ == '__main__':
                 print('>> Door has been opened.')
             else:
                 print('>> Door has been closed.')
+                
+        # check the state of touch pad
+        if touch_state != was_touch(14):
+            touch_state = not touch_state  # was_touch(tp)
+            
+            if touch_state is True:
+                print('>> Touch detected.')
+                
+        # print temperature
+        print(f'{get_temperature()}°C')
         
         sleep(0.5)

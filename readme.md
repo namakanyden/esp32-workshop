@@ -321,11 +321,12 @@ Po detekovaní dotyku v našej výslednej aplikácii dôjde k stiahnutiu dát o 
 Po úpravách bude náš kód v súbore `workshop.py` vyzerať takto:
 
 ```python
-from esp32 import hall_sensor, raw_temperature
-from machine import Pin, TouchPad
+from esp32 import hall_sensor
+from machine import Pin
 from time import sleep
 
-from he
+from helpers import is_door_open, was_touch, get_temperature
+
 
 if __name__ == '__main__':
     # init door
@@ -336,8 +337,7 @@ if __name__ == '__main__':
     led.value(door_state)
     
     # init touchpad
-    tp = TouchPad(Pin(14))
-    touch_state = was_touch(tp)
+    touch_state = was_touch(14)
 
     while True:
         # check state of the door
@@ -349,23 +349,25 @@ if __name__ == '__main__':
                 print('>> Door has been opened.')
             else:
                 print('>> Door has been closed.')
-        
+                
         # check the state of touch pad
-        if touch_state != was_touch(tp):
+        if touch_state != was_touch(14):
             touch_state = not touch_state  # was_touch(tp)
             
             if touch_state is True:
                 print('>> Touch detected.')
-        
+                
+        # print temperature
         print(f'{get_temperature()}°C')
+        
         sleep(0.5)
 ```
 
 ## Krok 8. Pripojenie do siete WiFi
 
-Pre pripojenie k WiFi použijeme mierne modifikovanú verziu funkcie `do_connect()`, ktorú odporúčajú použiť aj autori dokumentácie jazyka _MicroPython_ pre mikrokontrolér _ESP32_. Pôvodnú funkciu môžete nájsť na [tejto adrese](http://docs.micropython.org/en/latest/esp32/quickref.html#networking). Zmeny sú len mierne:
+Pre pripojenie k WiFi použijeme mierne modifikovanú verziu funkcie `do_connect()`, ktorá sa nachádza v module `helpers.py`. Túto funkciu odporúčajú použiť aj autori dokumentácie jazyka _MicroPython_ pre mikrokontrolér _ESP32_. Jej pôvodnú verziu môžete nájsť na [tejto adrese](http://docs.micropython.org/en/latest/esp32/quickref.html#networking). Zmeny sú len mierne:
 
-* funkcia má parametere pre SSID a heslo do WiFi siete
+* funkcia má parameter pre SSID a heslo do WiFi siete
 * po úspešnom pripojení dôjde ku synchronizácii hodín pomocou protokolu NTP
 
 ```python
@@ -391,24 +393,36 @@ def do_connect(ssid, password):
 Funkciu môžeme samozrejme otestovať priamo v REPL režime:
 
 ```python
+>>> from helpers import do_connect
 >>> do_connect('ssid', 'password')
 ```
 
-Ak máme správny názov siete a rovnako tak máme prístupové heslo do siete, po pripojení sa nám zobrazia tieto informácie:
+Ak máme správny názov siete a rovnako tak máme prístupové heslo do siete, po úspešnom pripojení sa zobrazia tieto informácie:
 
-* našu pridelenú IP adresu, masku siete a bránu
-* aktuálny čas (UTC), ktorý získame z NTP servera
+* pridelená IP adresa, maska siete a brána
+* aktuálny čas (UTC), ktorý sa získa z NTP servera
 
 ```python
+>>> from helpers import do_connect
 >>> do_connect('ssid', 'password')
 >> Network config: ('10.20.30.144', '255.255.255.0', '10.20.30.1', '10.20.30.1')
 >> Synchronizing time...
 >> Current time: 2022-09-08T09:14:15Z
 ```
 
-V tomto momente sme úspešne pripojení s našim mikrokontrolérom do WiFi siete.
+Funkciu budeme volať v module `workshop.py` ako prvú po spustení - ak nebudeme pripojení do internetu, náš scenár nebude fungovať.
+
+```python
+if __name__ == '__main__':
+    do_connect('ssid', 'password')
+    ...
+```
+
+V tomto momente sme úspešne pripojení s našim mikrokontrolérom do WiFi siete a môžeme sa pozrieť na možnosti jeho sieťovej komunikácie.
 
 ## Krok 9. Publikovanie teploty cez protokol MQTT
+
+Priamo vo firmvéri sa nachádza podpora pre komunikačný protokol _MQTT_. Jedná sa o moduly `umqtt/simple` a `umqtt/robust`. 
 
 HiveMQ Web Client: http://www.hivemq.com/demos/websocket-client/
 
