@@ -4,6 +4,8 @@
 
 Mikrokontrolér _ESP32_ je cenovo dostupné a namakané zariadenie vhodné pre oblasť _IoT_ vybavené _WiFi_ a _Bluetooth LE_. Čo je však úplne fantastické, má dostatok pamäte na to, aby ste do neho nahrali firmvér s jazykom _MicroPython_. Na tomto workshope si spolu vytvoríme jednoduché _IoT_ riešenie, na ktorom ukážeme silu mikrokontroléra _ESP32_ a jednoduchosť jeho programovania vďaka jazyku _MicroPython_.
 
+**Upozornenie:** Tento webinár bude dosť krátky, aby naše výsledné riešenie spĺňalo kritériá uvedené v knihe Csme programovali 
+
 ## Ciele
 
 1. 
@@ -255,9 +257,9 @@ while True:
 	sleep(0.5)
 ```
 
-## Krok x. Kapacitný senzor dotyku
+## Krok 8. Kapacitný senzor dotyku
 
-Mikrokontrolér _ESP32_ obsahuje _10_ kapacitných dotykových pinov (na obrázku s rozložením pin-ov sú označené ako `TOUCH0` až `TOUCH9`). Tieto piny dokážu detekovať zmeny vo všetkom, čo obsahuje elektrický náboj. Napríklad aj v ľudskej koži. To znamená, že tieto piny dokážu detekovať to, keď sa ich dotýkate napríklad prstom.
+Mikrokontrolér _ESP32_ obsahuje _10_ kapacitných dotykových GPIO pinov. Konkrétne sa jedná o piny `0`, `2`, `4`, `12`, `13`, `14`, `15`, `27`, `32` a `33` (na obrázku s rozložením pin-ov sú označené ako `TOUCH0` až `TOUCH9`). Tieto piny dokážu detekovať zmeny vo všetkom, čo obsahuje elektrický náboj. Napríklad aj v ľudskej koži. To znamená, že tieto piny dokážu detekovať to, keď sa ich dotýkate napríklad prstom.
 
 Ak chceme pracovať s kapacitným senzorom dotyku na týchto pin-och, musíme vytvoriť inštanciu triedy `TouchPad`, ktorá sa nachádza v module `machine`. Jej jediným parametrom je objekt typu `Pin`, ktorým identifikujeme konkrétny pin. Zmenu kapacity následne zistíme zavolaním metódy `.read()` nad vytvoreným objektom typu `TouchPad` .
 
@@ -268,7 +270,17 @@ Ak chceme pracovať s kapacitným senzorom dotyku na týchto pin-och, musíme vy
 647
 ```
 
-V prípade, že bol detekovaný dotyk, hodnota, ktorú senzor vráti, bude nízka (rádovo jednotky až desiatky). V prípade, že dotyk detekovaný nebol, hodnota senzora bude vysoká (rádovo stovky).
+V prípade, že bol detekovaný dotyk, hodnota, ktorú senzor vráti, bude nízka (rádovo jednotky až desiatky). V prípade, že dotyk detekovaný nebol, hodnota senzora bude vysoká (rádovo stovky). To si môžeme demonštrovať jednoduchou nekonečnou slučkou v súbore `playground.py`:
+
+```python
+from machine import Pin, TouchPad
+from time import sleep
+
+tp = TouchPad(Pin(14))
+while True:
+    print(tp.read())
+    sleep(0.5)
+```
 
 Pre potrebu nášho scenára si vytvoríme pomocnú funkciu `was_touch()`, ktorá vráti hodnotu `True`, ak bol detekovaný pohyb. V opačnom prípade vráti hodnotu `False`.
 
@@ -277,7 +289,11 @@ def was_touch(touch_pad):
     return tp.read() < 50
 ```
 
-## Krok x. 
+## Krok x. Superloop Update II.
+
+Po detekovaní dotyku v našej výslednej aplikácii dôjde k stiahnutiu dát o počasí z internetu. Keďže ale zatiaľ nie sme pripojení na internet, miesto počasia len vypíšeme na obrazovku, že sme detekovali dotyk. Neskôr túto časť nahradíme informáciami o počasí.
+
+Adekvá
 
 ```python
 ```
