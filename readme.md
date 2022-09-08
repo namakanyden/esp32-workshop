@@ -4,7 +4,7 @@
 
 Mikrokontrolér _ESP32_ je cenovo dostupné a namakané zariadenie vhodné pre oblasť _IoT_ vybavené _WiFi_ a _Bluetooth LE_. Čo je však úplne fantastické, má dostatok pamäte na to, aby ste do neho nahrali firmvér s jazykom _MicroPython_. Na tomto workshope si spolu vytvoríme jednoduché _IoT_ riešenie, na ktorom ukážeme silu mikrokontroléra _ESP32_ a jednoduchosť jeho programovania vďaka jazyku _MicroPython_.
 
-**Upozornenie:** Tento webinár bude dosť krátky, aby naše výsledné riešenie spĺňalo kritériá uvedené v knihe Csme programovali 
+**Upozornenie:** Webinár nebude dostatočne dlhý na to, aby naše výsledné riešenie spĺňalo kritériá uvedené v knihe [Čistý kód](https://www.martinus.sk/?uItem=73286). Zameriame sa preto viac na WOW efekt celého výsledku. O detailoch/rozporoch/vylepšeniach sa môžeme porozprávať osobne mimo workshop-u ;)
 
 ## Ciele
 
@@ -210,9 +210,9 @@ if __name__ == '__main__':
             led.value(door_state)
             
             if door_state == True:
-                print('Door has been opened.')
+                print('>> Door has been opened.')
             else:
-                print('Door has been closed.')
+                print('>> Door has been closed.')
         
         sleep(0.5)
 ```
@@ -289,20 +289,65 @@ def was_touch(touch_pad):
     return tp.read() < 50
 ```
 
-## Krok x. Superloop Update II.
+## Krok 9. Superloop Update II.
 
 Po detekovaní dotyku v našej výslednej aplikácii dôjde k stiahnutiu dát o počasí z internetu. Keďže ale zatiaľ nie sme pripojení na internet, miesto počasia len vypíšeme na obrazovku, že sme detekovali dotyk. Neskôr túto časť nahradíme informáciami o počasí.
 
-Adekvá
+Po úpravách bude náš kód v súbore `workshop.py` vyzerať takto:
 
 ```python
+from esp32 import hall_sensor, raw_temperature
+from machine import Pin, TouchPad
+from time import sleep
+
+
+def is_door_open():
+    return hall_sensor() < 100
+
+
+def get_temperature():
+    return (raw_temperature() - 32.0) / 1.8
+
+
+def was_touch(touch_pad):
+    return tp.read() < 50
+
+
+if __name__ == '__main__':
+    # init door
+    door_state = is_door_open()
+    
+    # init led
+    led = Pin(32, Pin.OUT, Pin.PULL_DOWN)
+    led.value(door_state)
+    
+    # init touchpad
+    tp = TouchPad(Pin(14))
+    touch_state = was_touch(tp)
+
+    while True:
+        # check state of the door
+        if door_state != is_door_open():
+            door_state = not door_state  # is_door_open()
+            led.value(door_state)
+            
+            if door_state == True:
+                print('>> Door has been opened.')
+            else:
+                print('>> Door has been closed.')
+        
+        # check the state of touch pad
+        if touch_state != was_touch(tp):
+            touch_state = not touch_state  # was_touch(tp)
+            
+            if touch_state is True:
+                print('>> Touch detected.')
+        
+        print(f'{get_temperature()}°C')
+        sleep(0.5)
 ```
 
-
-
-
-
-## Krok 8. Pripojenie do siete
+## Krok 8. Pripojenie do siete WiFi
 
 Pre pripojenie k WiFi použijeme mierne modifikovanú verziu funkcie `do_connect()`, ktorú odporúčajú použiť aj autori dokumentácie jazyka _MicroPython_ pre mikrokontrolér _ESP32_. Pôvodnú funkciu môžete nájsť na [tejto adrese](http://docs.micropython.org/en/latest/esp32/quickref.html#networking). Zmeny sú len mierne:
 
@@ -329,6 +374,26 @@ def do_connect(ssid, password):
     print(f'>> Current time: {now[0]}-{now[1]:02}-{now[2]:02}T{now[4]:02}:{now[5]:02}:{now[6]:02}Z')
 ```
 
+Funkciu môžeme samozrejme otestovať priamo v REPL režime:
+
+```python
+>>> do_connect('ssid', 'password')
+```
+
+Ak máme správny názov siete a rovnako tak máme prístupové heslo do siete, po pripojení sa nám zobrazia tieto informácie:
+
+* našu pridelenú IP adresu, masku siete a bránu
+* aktuálny čas (UTC), ktorý získame z NTP servera
+
+```python
+>>> do_connect('ssid', 'password')
+>> Network config: ('10.20.30.144', '255.255.255.0', '10.20.30.1', '10.20.30.1')
+>> Synchronizing time...
+>> Current time: 2022-09-08T09:14:15Z
+```
+
+V tomto momente sme úspešne pripojení s našim mikrokontrolérom do WiFi siete.
+
 ## Krok X. MQTT
 
 HiveMQ Web Client: http://www.hivemq.com/demos/websocket-client/
@@ -353,10 +418,11 @@ def get_current_weather(location):
 
 ## Ďalšie zdroje
 
-* [MicroPython](https://micropython.org/) - domovská stránka projektu _MicroPython_
+* [MicroPython](https://micropython.org/) - Domovská stránka projektu _MicroPython_.
 * [Quick reference for the ESP32](http://docs.micropython.org/en/latest/esp32/quickref.html) - Skrátená dokumentácia jazyka _MicroPython_ pre dosku s mikrokontrolérom _ESP32_.
 * [Random Nerd Tutorials](https://randomnerdtutorials.com/) - Portál venovaný nie len programovaniu mikrokontroléra _ESP32_ v jazyku _MicroPython_.
 * [ESP32 Labs](https://github.com/namakanyden/esp32-labs) - Niekoľko labov pre začiatočníkov v jazyku _MicroPython_ s mikrokontrolérom _ESP32_.
+* Last Minute Engineers: [ESP32 Projects](https://lastminuteengineers.com/electronics/esp32-projects/) - Časť portálu [Last Minute Engineers](https://lastminuteengineers.com) venovaná konkrétne projektom a informáciám venujúcim sa mikrokontroléru _ESP32_.
 
 ## TODO
 
