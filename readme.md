@@ -415,27 +415,99 @@ Funkciu budeme volať v module `workshop.py` ako prvú po spustení - ak nebudem
 ```python
 if __name__ == '__main__':
     do_connect('ssid', 'password')
-    ...
+    # ...
 ```
 
 V tomto momente sme úspešne pripojení s našim mikrokontrolérom do WiFi siete a môžeme sa pozrieť na možnosti jeho sieťovej komunikácie.
 
-## Krok 9. Publikovanie teploty cez protokol MQTT
+## Krok 9. MicroPython a komunikačný protokol MQTT
 
-Priamo vo firmvéri sa nachádza podpora pre komunikačný protokol _MQTT_. Jedná sa o moduly `umqtt/simple` a `umqtt/robust`. 
+Priamo vo firmvéri _MicroPython_-u, ktorý je nahratý v mikrokontroléri, sa nachádza podpora pre komunikačný protokol _MQTT_. Jedná sa o moduly `umqtt.simple` a `umqtt.robust`. Budeme používať modul `umqtt.robust` a pripájať sa budeme k verejnému MQTT brokeru na adrese `broker.hivemq.com` na štandardnom porte pre _MQTT_ protkol `1883`.
 
-HiveMQ Web Client: http://www.hivemq.com/demos/websocket-client/
+Začneme tým, že si vytvoríme objekt klienta. Pre jeho vytvorenie budeme potrebovať:
+
+* jednoznačný identifikátor klienta; očakáva sa reťazec
+* adresu MQTT brokera; v našom prípade použijeme adresu `broker.hivemq.com`
+* komunikačný port; predvolená hodnota je štanradné číslo portu `1883`, takže ho nastavovať nemusíme
+
+Pripojiť sa k broker-u môžeme priamo z REPL režimu mikrokontroléra volaním:
 
 ```python
-from umqtt.robust import MQTTClient
+>>> from umqtt.robust import MQTTClient
+>>> client = MQTTClient('jedinecne-id-klienta', 'broker.hivemq.com')
+>>> client.connect()
+```
 
-client = MQTTClient(ubinascii.hexlify(unique_id()), 'broker.hivemq.com')
-client.connect()
+**Poznámka:** Pre potreby workshop-u stačí, ak ako identifikátor použije každý účastník svoje meno. Problém však môže nastať, ak si dvaja účastníci zvolia rovnaký identifikátor. Pri reálnych riešeniach je však potrebné zabezpečiť, aby ste nemuseli zadávať identifikátor ručne a aj napriek tomu aby bola zabezpečená jeho jedinečnosť. Za týmto účelom môžete použiť volanie `ubinascii.hexlify(machine.unique_id())`, ktoré prekonvertuje idnetifikátor zariadenia (získaný volaním `machine.unique_id()`) na reťazec.
+
+Na otestovanie spojenia môžeme začať posielať správy z mikrokontroléra do dohodnutej témy, ktorou môže byť napríklad:
+
+```
+pycon/messages
+```
+
+Priamo z REPL režimu môžeme správu do uvedenej témy poslať takto:
+
+```python
+>>> client.publish('pycon/messages', 'pozdrav z mikrokontrolera esp32')
+```
+
+Aby sme si overili, že tieto správy do témy `pycon/messages` naozaj odchádzajú, môžeme sa prihlásiť na odber správ doručovaných do tejto témy. To môžeme zabezpečiť viacerými spôsobmi:
+
+* pomocou [HiveMQ webového klienta](http://www.hivemq.com/demos/websocket-client/) rovno v prehliadači,
+* pomocou niektorého desktopového klienta, alebo
+* môžeme použiť nástroje z príkazového riadku v prostredí OS Linux z balíčka `mosquitto-clients`
+    ```bash
+    $ mosquitto_sub -h broker.hivemq.com -F '@Y-@m-@dT@H:@M:@S@z : %p' -t 'pycon/messages'
+    ```
+
+## Krok 10. Publikovanie teploty cez protokol MQTT
+
+V našom scenári budeme pomocou protokolu _MQTT_ publikovať nameranú teplotu. Aktualizujeme teda náš program o pripojenie k MQTT brokerovi a o publikovanie údajov o teplote do kanála
+
+```
+pycon/sk/2022/meno_pouzivatela/door
+```
+
+MQTT klienta vytvoríme rovno po pripojení k sieti:
+
+```python
+if __name__ == '__main__':
+    # connect to wifi
+    do_connect('ssid', 'password')
     
+    # connecting to mqtt broker
+    client = MQTTClient('jedinecne-id-klienta', 'broker.hivemq.com')
+    client.connect()
+    
+    # ...
+```
+
+Publikovať teplotu budeme na/za riadkom, kde ju vypisujeme pomocou funkcie `print()`. Dôležité je však uviesť, že publikovaná hodnota/správa musí byť typu reťazec (`str`). Preto je potrebné pred odoslaním dáta najprv na reťazec konvertovať:
+
+```python
+# ...
+
+# publish temperature
+print(f'{get_temperature()}°C')
+client.publish('pycon/sk/2022/mirek/temp', str(get_temperature()))
+
+sleep(0.5)
+```
+
+Správy môžeme sledovať ako pri testovaní - napríklad z príkazového riadku pomocou nástroja `mosquitto_sub`:
+
+```bash
+$ mosquitto_sub -h broker.hivemq.com -F '%t %p' -t 'pycon/sk/2022/mirek/temp'
+```
+
+Podobným spôsobom môžeme publikovať aj údaj o stave dverí. Do časti programu, kde ošetrujeme zmenu stavu dverí môžeme pripísať riadok:
+
+```python
 client.publish('pycon/sk/2022/mirek/door', str(int(door_state)))
 ```
 
-## Krok 10. Stiahnutie informácií o počasí cez protokol HTTP
+## Krok 11. Stiahnutie informácií o počasí cez protokol HTTP
 
 ```python
 def get_current_weather(location):
@@ -447,10 +519,12 @@ def get_current_weather(location):
 ## Ďalšie zdroje
 
 * [MicroPython](https://micropython.org/) - Domovská stránka projektu _MicroPython_.
+* firmvér
 * [Quick reference for the ESP32](http://docs.micropython.org/en/latest/esp32/quickref.html) - Skrátená dokumentácia jazyka _MicroPython_ pre dosku s mikrokontrolérom _ESP32_.
 * [Random Nerd Tutorials](https://randomnerdtutorials.com/) - Portál venovaný nie len programovaniu mikrokontroléra _ESP32_ v jazyku _MicroPython_.
 * [ESP32 Labs](https://github.com/namakanyden/esp32-labs) - Niekoľko labov pre začiatočníkov v jazyku _MicroPython_ s mikrokontrolérom _ESP32_.
 * Last Minute Engineers: [ESP32 Projects](https://lastminuteengineers.com/electronics/esp32-projects/) - Časť portálu [Last Minute Engineers](https://lastminuteengineers.com) venovaná konkrétne projektom a informáciám venujúcim sa mikrokontroléru _ESP32_.
+* [HiveMQ Web Client](http://www.hivemq.com/demos/websocket-client/) - MQTT klient vo webovom prehliadači
 
 ## TODO
 

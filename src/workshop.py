@@ -1,11 +1,19 @@
 from esp32 import hall_sensor
 from machine import Pin
 from time import sleep
+from umqtt.robust import MQTTClient
 
-from helpers import is_door_open, was_touch, get_temperature
+from helpers import is_door_open, was_touch, get_temperature, do_connect
 
 
 if __name__ == '__main__':
+    # connect to wifi
+    do_connect('hello.world', 'jahodka123')
+    
+    # connecting to mqtt broker
+    client = MQTTClient('moj-esp32-mikrokontroler', 'broker.hivemq.com')
+    client.connect()
+    
     # init door
     door_state = is_door_open()
     
@@ -36,5 +44,7 @@ if __name__ == '__main__':
                 
         # print temperature
         print(f'{get_temperature()}°C')
+        client.publish('pycon/sk/2022/mirek/temp', str(get_temperature()))
         
         sleep(0.5)
+        
