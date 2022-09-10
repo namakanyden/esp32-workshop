@@ -3,7 +3,7 @@ from machine import Pin
 from time import sleep
 from umqtt.robust import MQTTClient
 
-from helpers import is_door_open, was_touch, get_temperature, do_connect
+from helpers import is_door_open, was_touch, get_temperature, do_connect, get_current_weather
 
 
 if __name__ == '__main__':
@@ -41,6 +41,8 @@ if __name__ == '__main__':
             
             if touch_state is True:
                 print('>> Touch detected.')
+                data = get_current_weather('bratislava')
+                print(f'>> Aktuálna teplota v meste {data["location"]} ({data["country"]}) je {data["temp"]}°C')
                 
         # print temperature
         print(f'{get_temperature()}°C')
