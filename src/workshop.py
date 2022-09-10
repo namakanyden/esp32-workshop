@@ -8,7 +8,7 @@ from helpers import is_door_open, was_touch, get_temperature, do_connect, get_cu
 
 if __name__ == '__main__':
     # connect to wifi
-    do_connect('hello.world', 'jahodka123')
+    do_connect('ssid', 'password')
     
     # connecting to mqtt broker
     client = MQTTClient('moj-esp32-mikrokontroler', 'broker.hivemq.com')
