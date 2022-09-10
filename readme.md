@@ -575,12 +575,13 @@ Funkcia sa dá vyskúšať jednoducho z REPL režimu takto:
 {'country': 'SK', 'temp': 17.25, 'location': 'Kosice'}
 ```
 
-## Krok 12. Publikovanie informácií o počasí po detekovaní dotyku
+## Krok 12. Prezentovanie informácií o počasí po detekovaní dotyku
 
-V module `workshop.py` nájdeme miesto, kde po detekcii dotyku vypisujeme do konzoly text. Miesto funkcie `print()` vložíme tento fragment kódu:
+V module `workshop.py` nájdeme miesto, kde po detekcii dotyku vypisujeme do konzoly text. Za funkciu `print()` pridáme ďalšie riadky kódu:
 
 ```python
 if touch_state is True:
+    print('>> Touch detected.')
     data = get_current_weather('bratislava')
     print(f'>> Aktuálna teplota v meste {data["location"]} ({data["country"]}) je {data["temp"]}°C')
 ```
@@ -588,13 +589,8 @@ if touch_state is True:
 ## Ďalšie zdroje
 
 * [MicroPython](https://micropython.org/) - Domovská stránka projektu _MicroPython_.
-* firmvér
 * [Quick reference for the ESP32](http://docs.micropython.org/en/latest/esp32/quickref.html) - Skrátená dokumentácia jazyka _MicroPython_ pre dosku s mikrokontrolérom _ESP32_.
 * [Random Nerd Tutorials](https://randomnerdtutorials.com/) - Portál venovaný nie len programovaniu mikrokontroléra _ESP32_ v jazyku _MicroPython_.
 * [ESP32 Labs](https://github.com/namakanyden/esp32-labs) - Niekoľko labov pre začiatočníkov v jazyku _MicroPython_ s mikrokontrolérom _ESP32_.
-* Last Minute Engineers: [ESP32 Projects](https://lastminuteengineers.com/electronics/esp32-projects/) - Časť portálu [Last Minute Engineers](https://lastminuteengineers.com) venovaná konkrétne projektom a informáciám venujúcim sa mikrokontroléru _ESP32_.
+* Last Minute Engineers: [ESP32 Projects](https://lastminuteengineers.com/electronics/esp32-projects/) - Časť portálu [Last Minute Engineers](https://lastminuteengineers.com) venovaná konkrétne projektom a informáciám o mikrokontroléri _ESP32_.
 * [HiveMQ Web Client](http://www.hivemq.com/demos/websocket-client/) - MQTT klient vo webovom prehliadači
-
-## TODO
-
-* Zmeni sa pracovna teplota ak zmenim pracovnu frekvenciu mikrokontrolera?
