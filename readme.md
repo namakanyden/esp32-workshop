@@ -8,7 +8,11 @@ Mikrokontrolér _ESP32_ je cenovo dostupné a namakané zariadenie vhodné pre o
 
 ## Ciele
 
-1. 
+1. Naučiť sa základy práce v REPL režime jazyka _MicroPython_.
+1. Naučiť sa pracovať s vnútornými senzormi mikrokontroléra _ESP32_.
+1. Naučiť sa pripojiť mikrokontrolér _ESP32_ do internetu pomocou zabudovaného _WiFi_ modulu.
+1. Naučiť sa publikovať údaje z mikrokontroléra pomocou komunikačného protokolu _MQTT_.
+1. Naučiť sa základy používania modulu `urequests` pre prácu s HTTP protokolom.
 
 ## Krok 1. Čo budeme potrebovať?
 
@@ -16,6 +20,9 @@ Ešte predtým, ako sa pustíme do tvorby aplikácie, si pripravíme prostredie 
 
 - editor kódu [Thonny](https://thonny.org) (alebo ľubovoľný iný editor kódu jazyka Python)
 - dosku s mikrokontrolérom _ESP32_, zapojenie podľa schémy a USB kábel na prepojenie dosky s počítačom
+- magnet
+- LED diódu
+- voľný vodič typu M-F (na detekovanie dotyku)
 
 Ak používate OS Windows a chcete pracovať s mikrokontrolérom _ESP32_, musíte si nainštalovať ešte ovládač pre *CP210x USB to UART Bridge* napríklad [odtiaľto](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers?tab=downloads).
 
@@ -515,7 +522,7 @@ Dopyt pre získanie aktuálneho počasia v _Bratislave_ v režime REPL bude vyze
 
 ```python
 >>> import urequests
->>> url = 'http://api.openweathermap.org/data/2.5/weather?units=metric&q=bratislava&appid=XXX'
+>>> url = 'http://api.openweathermap.org/data/2.5/weather?units=metric&q=bratislava&appid=9e547051a2a00f2bf3e17a160063002d'
 >>> response = urequests.get(url)
 ```
 
@@ -545,11 +552,14 @@ Pre zjednodušenie práce je v module `helpers.py` vytvorená funkcia `get_curre
 ```python
 import urequests
 
+APPID = '9e547051a2a00f2bf3e17a160063002d'
+
 def get_current_weather(location):
-    appid = ''
-    url = f'http://api.openweathermap.org/data/2.5/weather?units=metric&q={location}&appid={appid}'
+    url = f'http://api.openweathermap.org/data/2.5/weather?units=metric&q={location}&appid={APPID}'
     response = urequests.get(url)
     data = response.json()
+    response.close()
+    
     return {
         'location': data['name'],
         'country': data['sys']['country'],
@@ -561,10 +571,8 @@ Funkcia sa dá vyskúšať jednoducho z REPL režimu takto:
 
 ```python
 >>> from helpers import get_current_weather
->>> get_current_weather('bratislava')
-{
-    
-}
+>>> get_current_weather('kosice')
+{'country': 'SK', 'temp': 17.25, 'location': 'Kosice'}
 ```
 
 ## Krok 12. Publikovanie informácií o počasí po detekovaní dotyku
@@ -574,7 +582,7 @@ V module `workshop.py` nájdeme miesto, kde po detekcii dotyku vypisujeme do kon
 ```python
 if touch_state is True:
     data = get_current_weather('bratislava')
-    print(f'>> Aktuálna teplota v lokácii {data['location']} ({data['country']}) je {data.temp}°C.')
+    print(f'>> Aktuálna teplota v meste {data["location"]} ({data["country"]}) je {data["temp"]}°C')
 ```
 
 ## Ďalšie zdroje
