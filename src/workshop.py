@@ -1,4 +1,3 @@
-from esp32 import hall_sensor
 from machine import Pin
 from time import sleep
 from umqtt.robust import MQTTClient
@@ -18,7 +17,7 @@ if __name__ == '__main__':
     door_state = is_door_open()
     
     # init led
-    led = Pin(32, Pin.OUT, Pin.PULL_DOWN)
+    led = Pin(21, Pin.OUT, Pin.PULL_DOWN)
     led.value(door_state)
     
     # init touchpad
@@ -51,4 +50,4 @@ if __name__ == '__main__':
         client.publish('pycon/sk/2022/mirek/temp', str(get_temperature()))
         
         sleep(0.5)
-        
+

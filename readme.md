@@ -4,6 +4,8 @@
 
 Mikrokontrolér _ESP32_ je cenovo dostupné a namakané zariadenie vhodné pre oblasť _IoT_ vybavené _WiFi_ a _Bluetooth LE_. Čo je však úplne fantastické, má dostatok pamäte na to, aby ste do neho nahrali firmvér s jazykom _MicroPython_. Na tomto workshope si spolu vytvoríme jednoduché _IoT_ riešenie, na ktorom ukážeme silu mikrokontroléra _ESP32_ a jednoduchosť jeho programovania vďaka jazyku _MicroPython_.
 
+**Odporúčaný čas:** 120 minút
+
 **Upozornenie:** Webinár nebude dostatočne dlhý na to, aby naše výsledné riešenie spĺňalo kritériá uvedené v knihe [Čistý kód](https://www.martinus.sk/?uItem=73286). Zameriame sa preto viac na WOW efekt celého výsledku. O detailoch/rozporoch/vylepšeniach sa môžeme porozprávať osobne mimo workshop-u ;)
 
 ## Ciele
@@ -339,7 +341,7 @@ if __name__ == '__main__':
     door_state = is_door_open()
     
     # init led
-    led = Pin(32, Pin.OUT, Pin.PULL_DOWN)
+    led = Pin(21, Pin.OUT, Pin.PULL_DOWN)
     led.value(door_state)
     
     # init touchpad
