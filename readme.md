@@ -89,7 +89,7 @@ import json
 
 ## Krok 3. Blikanie LED diódou v režime REPL
 
-LED diódu máme pripojenú ku pin-u s číslom _32_. Budeme ju používať na signalizáciu stavu dverí, čo znamená, že LED dióda bude svietiť vtedy, keď budú dvere otvorené a diódu zhasneme, keď sa dvere zatvoria. Pri predstavení práce s LED diódou si ukážeme silu, ktorú nám ponúka _REPL_ režim jazyka _MicroPython_.
+LED diódu máme pripojenú ku pin-u s číslom _21_. Budeme ju používať na signalizáciu stavu dverí, čo znamená, že LED dióda bude svietiť vtedy, keď budú dvere otvorené a diódu zhasneme, keď sa dvere zatvoria. Pri predstavení práce s LED diódou si ukážeme silu, ktorú nám ponúka _REPL_ režim jazyka _MicroPython_.
 
 Začneme tým, že z balíka `machine` importujeme triedu `Pin`:
 
@@ -111,10 +111,10 @@ Vytvoríme objekt triedy `Pin`, ktorý bude reprezentovať _LED_ diódu. Konštr
 
 **Poznámka:** Trieda `Pin` má výrazne viac možností konfigurácie a práce. Pre podrobnejšie informácie sa pozrite do [dokumentácie](https://docs.micropython.org/en/latest/library/machine.Pin.html).
 
-Výsledný kód pre vytvorenie výstupného pin-u na pin-e č. _32_ s pripojeným pull-down rezistorom bude vyzerať nasledovne:
+Výsledný kód pre vytvorenie výstupného pin-u na pin-e č. _21_ s pripojeným pull-down rezistorom bude vyzerať nasledovne:
 
 ```python
->>> led = Pin(32, Pin.OUT, Pin.PULL_DOWN)
+>>> led = Pin(21, Pin.OUT, Pin.PULL_DOWN)
 ```
 
 Pre prácu s diódou, resp. všeobecne s digitálnym pin-om, máme k dispozícii niekoľko metód. Ak chceme získať aktuálny stav pin-u, zavoláme metódu `value()`:
