@@ -32,8 +32,10 @@ if __name__ == '__main__':
             
             if door_state == True:
                 print('>> Door has been opened.')
+                led.on()
             else:
                 print('>> Door has been closed.')
+                led.off()
                 
         # check the state of touch pad
         if touch_state != was_touch(14):
