@@ -25,6 +25,7 @@ Ešte predtým, ako sa pustíme do tvorby aplikácie, si pripravíme prostredie 
 - magnet
 - LED diódu
 - voľný vodič typu M-F (na detekovanie dotyku)
+- prekopírovať na mikrokontrolér súbory [`playground.py`](src/playground.py), [`helpers.py`](src/helpers.py) a vytvoriť prázdny súbor `workshop.py`, do ktorého budeme zapisovať kód výsledného riešenia
 
 Ak používate OS Windows a chcete pracovať s mikrokontrolérom _ESP32_, musíte si nainštalovať ešte ovládač pre *CP210x USB to UART Bridge* napríklad [odtiaľto](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers?tab=downloads).
 
@@ -145,6 +146,21 @@ Trieda `Pin` však umožňuje nad svojimi inštanciami volať aj priamo metódu 
 ```python
 >>> led.on()
 >>> led.off()
+```
+Na záver už len spojíme všetko dokopy a vytvoríme jednoduchý blikač, ktorý bude blikať v sekundových intervaloch. Kód môžete zapísať do súboru `playground.py` a následne ho spustiť:
+
+```python
+from machine import Pin
+from time import sleep
+
+
+led = Pin(21, Pin.OUT)
+
+while True:
+    led.on()
+    sleep(1)
+    led.off()
+    sleep(1)
 ```
 
 ## Krok 4. Hallova sonda/senzor
@@ -589,6 +605,7 @@ if touch_state is True:
 
 ## Ďalšie zdroje
 
+* Namakaný deň: [ESP32 labs](https://github.com/namakanyden/esp32-labs) - ďalšie laby pre mikrokontrolér _ESP32_, ktoré predstavujú pripojenie a prácu s niektorými senzormi a akčnými členmi
 * [MicroPython](https://micropython.org/) - Domovská stránka projektu _MicroPython_.
 * [Quick reference for the ESP32](http://docs.micropython.org/en/latest/esp32/quickref.html) - Skrátená dokumentácia jazyka _MicroPython_ pre dosku s mikrokontrolérom _ESP32_.
 * [Random Nerd Tutorials](https://randomnerdtutorials.com/) - Portál venovaný nie len programovaniu mikrokontroléra _ESP32_ v jazyku _MicroPython_.
