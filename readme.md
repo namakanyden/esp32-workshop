@@ -292,7 +292,7 @@ Našu hlavnú slučku môžeme aktualizovať vypísaním pracovnej teploty pri k
 
 ```python
 while True:
-    ...
+    # ...
     print(f'{get_temperature()}°C')
 	sleep(0.5)
 ```
