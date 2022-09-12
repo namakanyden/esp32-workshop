@@ -200,8 +200,10 @@ Funkcia je veľmi jednoduchá a vyzerá takto:
 ```python
 from esp32 import hall_sensor
 
+HALL_TRESHOLD = 150
+
 def is_door_open():
-    return hall_sensor() < 150
+    return hall_sensor() < HALL_TRESHOLD
 ```
 
 Vyskúšať ju môžete priamo v REPL režime takto:
@@ -212,7 +214,7 @@ Vyskúšať ju môžete priamo v REPL režime takto:
 True
 ```
 
-**Poznámka:** Hodnotu, pri ktorej budeme považovať dvere za zatvorené, si musí každý nastaviť sám, nakoľko citlivosť senzora a sila použitého magnetu môže byť na rozličných zariadeniach iná.
+**Poznámka:** Hodnotu, pri ktorej budeme považovať dvere za zatvorené, si musí každý nastaviť sám, nakoľko citlivosť senzora a sila použitého magnetu môže byť na rozličných zariadeniach iná. Táto hodnota je uložená v premennej `HALL_TRESHOLD` v module `workshop.py`.
 
 ## Krok 5. Superloop
 
@@ -325,9 +327,11 @@ Pre potrebu nášho scenára sa v module `helpers.py` nachádza funkcia `was_tou
 ```python
 from machine import TouchPad, Pin
 
+TOUCH_TRESHOLD = 50
+
 def was_touch(pin):
     touchpad = TouchPad(Pin(pin))
-    return touchpad.read() < 50
+    return touchpad.read() < TOUCH_TRESHOLD
 ```
 
 Správanie funkcie si môžete overiť priamo v REPL režime napríklad takto:
@@ -337,6 +341,8 @@ Správanie funkcie si môžete overiť priamo v REPL režime napríklad takto:
 >>> was_touch(14)
 False
 ```
+
+**Poznámka:** Podobne ako v prípade _hallovho senzora_, aj tu sa môžu hodnoty vrátené metódou `.read()` líšiť. Preto vašu hraničnú hodnotu si môžete nastaviť v premennej `TOUCH_TRESHOLD` v module `workshop.py`.
 
 ## Krok 9. Superloop Update II.
 
