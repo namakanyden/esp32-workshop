@@ -26,6 +26,7 @@ Ešte predtým, ako sa pustíme do tvorby aplikácie, si pripravíme prostredie 
 - LED diódu
 - voľný vodič typu M-F (na detekovanie dotyku)
 - prekopírovať na mikrokontrolér súbory [`playground.py`](src/playground.py), [`helpers.py`](src/helpers.py) a vytvoriť prázdny súbor `workshop.py`, do ktorého budeme zapisovať kód výsledného riešenia
+- kľúč pre prístup k HTTP REST API služby [openweathermap.org](https://openweathermap.org/) (pre workshop stačí jeden, takže stačí, ak sa zaregistruje len inštruktor a vyzdieľa svoj kľúč s ostatnými; registrácia je zdarma)
 
 Ak používate OS Windows a chcete pracovať s mikrokontrolérom _ESP32_, musíte si nainštalovať ešte ovládač pre *CP210x USB to UART Bridge* napríklad [odtiaľto](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers?tab=downloads).
 
@@ -170,7 +171,7 @@ Mikrokontrolér _ESP32_ je vybavený _hallovým senzorom_, ktorý detekuje prít
 Silu magnetického senzoru v okolí mikrokontroléra _ESP32_ prečítame zavolaním funkcie `hall_sensor()`, ktorá sa nachádza v module `esp32`:
 
 ```python
->>> from esp32 import hall_sensor()
+>>> from esp32 import hall_sensor
 >>> hall_sensor()
 44
 ```
@@ -623,3 +624,4 @@ if touch_state is True:
 ## Licencia
 
 Uvedené dielo podlieha licencii [Creative Commons BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.cs).
+
