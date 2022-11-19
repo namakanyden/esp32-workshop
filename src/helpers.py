@@ -52,6 +52,8 @@ def do_connect(ssid, password):
     now = rtc.datetime()
     log(f'Current time: {now[0]}-{now[1]:02}-{now[2]:02}T{now[4]:02}:{now[5]:02}:{now[6]:02}Z')
 
+    return wlan
+
 
 def get_current_weather(location):
     """

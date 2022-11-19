@@ -633,6 +633,8 @@ Maják (z angl. _beacon_) je (bezdrôtové) zariadenie, ktoré v pravidelných i
 
 ### O protokole _ESP-NOW_
 
+![ESP-NOW logo](images/logo-esp-now.png)
+
 _ESP-NOW_ je bezdrôtový komunikačný protokol, ktorý podporuje:
 
 * priame spojenie s max. 20 zaregistrovanými zariadeniami bez WiFi protokolu
@@ -663,9 +665,35 @@ Okrem toho však treba vytvoriť objekt z triedy `ESPNow`. To urobíme pomocou n
 ```python
 from espnow import ESPNow
 
-en = ESPNow()
-en.active(True)
-en.add_peer(b'\xbb\xbb\xbb\xbb\xbb\xbb')
+espnow = ESPNow()
+espnow.active(True)
+```
+
+
+### Manažment peer-ov
+
+Predtým, ako budeme môcť poslať správu inému zariadeniu (z angl. _peer_), musíme toto zariadenie zaregistrovať. Zaregistrovať zariadenie je možné zavolaním metódy `.add_peer()` nad objektom typu `ESPNow` s MAC adresou zariadenia, ktorému chceme posielať správu.
+
+MAC adresu je možné zistiť na cieľovom zariadení nasledovne:
+
+```python
+>>> import network
+>>> wlan = network.WLAN(network.STA_IF)
+>>> wlan.config('mac')
+b'\xb4\xe6-\x9e7M'
+```
+
+Zistené zariadenie nasledovne vieme zaregistrovať takto:
+
+```
+espnow.add_peer(b'\xb4\xe6-\x9e7M')
+```
+
+Overiť registráciu môžeme napríklad vypísaním zoznamu všetkých zaregistrovaných zariadení volaním:
+
+```
+>>> espnow.get_peers()
+((b'\xb4\xe6-\x9e7M', b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', 0, 0, False),)
 ```
 
 
@@ -684,6 +712,20 @@ payload = '{};{};{}'.format(
     'makac',
     get_temperature(),
     hall_sensor())
+```
+
+
+### Odoslanie správy
+
+Pripravenú správu odošleme zavolaním metódy `.send()` nad objektom typu `ESPNow`. Táto metóda má dva parametre:
+
+* MAC adresa zariadenia, ktorému správu posielame, a
+* samotnú správu
+
+Odoslanie pripravenej správy bude teda vyzerať nasledovne:
+
+```python
+
 ```
 
 
