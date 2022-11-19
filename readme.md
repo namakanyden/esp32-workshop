@@ -4,9 +4,10 @@
 
 Mikrokontrolér _ESP32_ je cenovo dostupné a namakané zariadenie vhodné pre oblasť _IoT_ vybavené _WiFi_ a _Bluetooth LE_. Čo je však úplne fantastické, má dostatok pamäte na to, aby ste do neho nahrali firmvér s jazykom _MicroPython_. Na tomto workshope si spolu vytvoríme jednoduché _IoT_ riešenie, na ktorom ukážeme silu mikrokontroléra _ESP32_ a jednoduchosť jeho programovania vďaka jazyku _MicroPython_.
 
-**Odporúčaný čas:** 120 minút
+**Odporúčaný čas:** 180 minút
 
 **Upozornenie:** Webinár nebude dostatočne dlhý na to, aby naše výsledné riešenie spĺňalo kritériá uvedené v knihe [Čistý kód](https://www.martinus.sk/?uItem=73286). Zameriame sa preto viac na WOW efekt celého výsledku. O detailoch/rozporoch/vylepšeniach sa môžeme porozprávať osobne mimo workshop-u ;)
+
 
 ## Ciele
 
@@ -15,6 +16,7 @@ Mikrokontrolér _ESP32_ je cenovo dostupné a namakané zariadenie vhodné pre o
 1. Naučiť sa pripojiť mikrokontrolér _ESP32_ do internetu pomocou zabudovaného _WiFi_ modulu.
 1. Naučiť sa publikovať údaje z mikrokontroléra pomocou komunikačného protokolu _MQTT_.
 1. Naučiť sa základy používania modulu `urequests` pre prácu s HTTP protokolom.
+
 
 ## Krok 1. Čo budeme potrebovať?
 
@@ -27,8 +29,10 @@ Ešte predtým, ako sa pustíme do tvorby aplikácie, si pripravíme prostredie 
 - voľný vodič typu M-F (na detekovanie dotyku)
 - prekopírovať na mikrokontrolér súbory [`playground.py`](src/playground.py), [`helpers.py`](src/helpers.py) a vytvoriť prázdny súbor `workshop.py`, do ktorého budeme zapisovať kód výsledného riešenia
 - kľúč pre prístup k HTTP REST API služby [openweathermap.org](https://openweathermap.org/) (pre workshop stačí jeden, takže stačí, ak sa zaregistruje len inštruktor a vyzdieľa svoj kľúč s ostatnými; registrácia je zdarma)
+- nahratý alternatívny firmwér s podporou protokolu [ESP-NOW](https://www.espressif.com/en/products/software/esp-now/overview) z [tejto adresy](https://github.com/glenn20/micropython-espnow-images)
 
 Ak používate OS Windows a chcete pracovať s mikrokontrolérom _ESP32_, musíte si nainštalovať ešte ovládač pre *CP210x USB to UART Bridge* napríklad [odtiaľto](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers?tab=downloads).
+
 
 ## Krok 2. Predstavenie mikrokontroléra ESP32
 
@@ -49,6 +53,7 @@ A presne na prácu s týmito senzormi sa pozrieme počas tohto workshopu. Vytvor
 Schéma zapojenia pre tento scenár vyzerá takto:
 
 **Upozornenie:** Vo svojich zapojeniach **NIKDY** nezapájajte LED diódy bez ochranného rezistora!!!
+
 
 ## Krok 2. Prvé kroky
 
@@ -90,6 +95,7 @@ môžete modul importovať aj
 ```python
 import json
 ```
+
 
 ## Krok 3. Blikanie LED diódou v režime REPL
 
@@ -164,6 +170,7 @@ while True:
     sleep(1)
 ```
 
+
 ## Krok 4. Hallova sonda/senzor
 
 Mikrokontrolér _ESP32_ je vybavený _hallovým senzorom_, ktorý detekuje prítomnosť magnetického poľa. Jeho sila je vyjadrená hodnotou, ktorú tento senzor vráti - čím je pole väčšie/silnejšie, tým je aj hodnota senzora vyššia.
@@ -217,6 +224,7 @@ True
 
 **Poznámka:** Hodnotu, pri ktorej budeme považovať dvere za zatvorené, si musí každý nastaviť sám, nakoľko citlivosť senzora a sila použitého magnetu môže byť na rozličných zariadeniach iná. Táto hodnota je uložená v premennej `HALL_TRESHOLD` v module `workshop.py`.
 
+
 ## Krok 5. Superloop
 
 Je načase dať veci dokopy a vytvoriť senzor otvorených dverí využívajúci _hallov senzor_ a LED diódu. Aktualizujeme teda obsah súboru `workshop.py`.
@@ -231,7 +239,7 @@ from helpers import is_door_open
 if __name__ == '__main__':
     # init door
     door_state = is_door_open()
-    
+
     # init led
     led = Pin(21, Pin.OUT, Pin.PULL_DOWN)
     led.value(door_state)
@@ -241,14 +249,15 @@ if __name__ == '__main__':
         if door_state != is_door_open():
             door_state = not door_state  # is_door_open()
             led.value(door_state)
-            
+
             if door_state == True:
                 print('>> Door has been opened.')
             else:
                 print('>> Door has been closed.')
-        
+
         sleep(0.5)
 ```
+
 
 ## Krok 6. Vnútorný senzor teploty
 
@@ -345,6 +354,7 @@ False
 
 **Poznámka:** Podobne ako v prípade _hallovho senzora_, aj tu sa môžu hodnoty vrátené metódou `.read()` líšiť. Preto vašu hraničnú hodnotu si môžete nastaviť v premennej `TOUCH_TRESHOLD` v module `workshop.py`.
 
+
 ## Krok 9. Superloop Update II.
 
 Po detekovaní dotyku v našej výslednej aplikácii dôjde k stiahnutiu dát o počasí z internetu. Keďže ale zatiaľ nie sme pripojení na internet, miesto počasia len vypíšeme na obrazovku, že sme detekovali dotyk. Neskôr túto časť nahradíme informáciami o počasí.
@@ -362,11 +372,11 @@ from helpers import is_door_open, was_touch, get_temperature
 if __name__ == '__main__':
     # init door
     door_state = is_door_open()
-    
+
     # init led
     led = Pin(21, Pin.OUT, Pin.PULL_DOWN)
     led.value(door_state)
-    
+
     # init touchpad
     touch_state = was_touch(14)
 
@@ -375,24 +385,25 @@ if __name__ == '__main__':
         if door_state != is_door_open():
             door_state = not door_state  # is_door_open()
             led.value(door_state)
-            
+
             if door_state == True:
                 print('>> Door has been opened.')
             else:
                 print('>> Door has been closed.')
-                
+
         # check the state of touch pad
         if touch_state != was_touch(14):
             touch_state = not touch_state  # was_touch(tp)
-            
+
             if touch_state is True:
                 print('>> Touch detected.')
-                
+
         # print temperature
         print(f'{get_temperature()}°C')
-        
+
         sleep(0.5)
 ```
+
 
 ## Krok 8. Pripojenie do siete WiFi
 
@@ -412,7 +423,7 @@ def do_connect(ssid, password):
         while not wlan.isconnected():
             pass
     print('>> Network config:', wlan.ifconfig())
-    
+
     # set time and date with NTP
     print('>> Synchronizing time...')
     ntptime.settime()
@@ -450,6 +461,7 @@ if __name__ == '__main__':
 ```
 
 V tomto momente sme úspešne pripojení s našim mikrokontrolérom do WiFi siete a môžeme sa pozrieť na možnosti jeho sieťovej komunikácie.
+
 
 ## Krok 9. MicroPython a komunikačný protokol MQTT
 
@@ -492,6 +504,7 @@ Aby sme si overili, že tieto správy do témy `pycon/messages` naozaj odchádza
     $ mosquitto_sub -h broker.hivemq.com -F '@Y-@m-@dT@H:@M:@S@z : %p' -t 'pycon/messages'
     ```
 
+
 ## Krok 10. Publikovanie teploty cez protokol MQTT
 
 V našom scenári budeme pomocou protokolu _MQTT_ publikovať nameranú teplotu. Aktualizujeme teda náš program o pripojenie k MQTT brokerovi a o publikovanie údajov o teplote do kanála
@@ -506,11 +519,11 @@ MQTT klienta vytvoríme rovno po pripojení k sieti:
 if __name__ == '__main__':
     # connect to wifi
     do_connect('ssid', 'password')
-    
+
     # connecting to mqtt broker
     client = MQTTClient('jedinecne-id-klienta', 'broker.hivemq.com')
     client.connect()
-    
+
     # ...
 ```
 
@@ -537,6 +550,7 @@ Podobným spôsobom môžeme publikovať aj údaj o stave dverí. Do časti prog
 ```python
 client.publish('pycon/sk/2022/mirek/door', str(int(door_state)))
 ```
+
 
 ## Krok 11. Stiahnutie informácií o počasí cez protokol HTTP
 
@@ -583,7 +597,7 @@ def get_current_weather(location):
     response = urequests.get(url)
     data = response.json()
     response.close()
-    
+
     return {
         'location': data['name'],
         'country': data['sys']['country'],
@@ -599,6 +613,7 @@ Funkcia sa dá vyskúšať jednoducho z REPL režimu takto:
 {'country': 'SK', 'temp': 17.25, 'location': 'Kosice'}
 ```
 
+
 ## Krok 12. Prezentovanie informácií o počasí po detekovaní dotyku
 
 V module `workshop.py` nájdeme miesto, kde po detekcii dotyku vypisujeme do konzoly text. Za funkciu `print()` pridáme ďalšie riadky kódu:
@@ -610,6 +625,68 @@ if touch_state is True:
     print(f'>> Aktuálna teplota v meste {data["location"]} ({data["country"]}) je {data["temp"]}°C')
 ```
 
+
+## Krok 13. ESP-NOW beacon
+
+Maják (z angl. _beacon_) je (bezdrôtové) zariadenie, ktoré v pravidelných intervaloch vysiela rádiový signál s údajmi pre iné zariadenia. No a takýto maják s údajmi, ktoré máme, si vyrobíme z mikrokontroléra _ESP32_ a vysielať ho budeme pomocou komunikačného protokolu _ESP-NOW_.
+
+
+### O protokole _ESP-NOW_
+
+_ESP-NOW_ je bezdrôtový komunikačný protokol, ktorý podporuje:
+
+* priame spojenie s max. 20 zaregistrovanými zariadeniami bez WiFi protokolu
+* šifrovanú a otvorenú komunikáciu (naraz je možné šifrovane komunikovať s max. 6 klientmi)
+* max. dĺžku správy _250_ bytov
+* súčasnú komunikáciu aj s WiFi na mikrokontroléroch _ESP32_ a _ESP8266_
+
+Tento protokol je vhodný na riešenia v malých _IoT_ sieťach, v riešeniach citlivých na oneskorenie alebo na nízku spotrebu, prípadne v riešeniach pre komunikáciu na veľké vzdialenosti medzi zariadeniami (až stovky metrov).
+
+Tento protokol taktiež umožňuje sledovať silu WiFi signálu (RSSI) komunikujúcich zariadení.
+
+
+### Inicializácia vysielania
+
+Pre prácu s protokolom _ESP-NOW_ musíme mať zapnutý a aktivovaný _WiFi_ modul. To znamená, že potrebujeme v našom kóde spustiť aspoň tieto riadky:
+
+```python
+import network
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+```
+
+V našom prípade túto aktiváciu rieši funkcia `do_connect()`, takže nepotrebujeme náš kód nijako upravovať. Ak však budete riešiť aplikáciu, ktorá bude komunikovať len pomocou tohto protokolu, vaše riešenie musí tieto riadky obsahovať.
+
+Okrem toho však treba vytvoriť objekt z triedy `ESPNow`. To urobíme pomocou nasledujúcich riadkov:
+
+```python
+from espnow import ESPNow
+
+en = ESPNow()
+en.active(True)
+en.add_peer(b'\xbb\xbb\xbb\xbb\xbb\xbb')
+```
+
+
+### Príprava správy
+
+Správa, ktorú budú naše majáky vysielať, musí mať max. _250_ znakov. Preto ju budeme vysielať ako jednoduchý reťazec v _CSV_ formáte. Správa bude v tvare:
+
+```
+meno majáka;teplota;úroveň mag. poľa
+```
+
+Správu si pripravíme do premennej `payload` takto:
+
+```python
+payload = '{};{};{}'.format(
+    'makac',
+    get_temperature(),
+    hall_sensor())
+```
+
+
 ## Ďalšie zdroje
 
 * Namakaný deň: [ESP32 labs](https://github.com/namakanyden/esp32-labs) - ďalšie laby pre mikrokontrolér _ESP32_, ktoré predstavujú pripojenie a prácu s niektorými senzormi a akčnými členmi
@@ -619,9 +696,12 @@ if touch_state is True:
 * [ESP32 Labs](https://github.com/namakanyden/esp32-labs) - Niekoľko labov pre začiatočníkov v jazyku _MicroPython_ s mikrokontrolérom _ESP32_.
 * Last Minute Engineers: [ESP32 Projects](https://lastminuteengineers.com/electronics/esp32-projects/) - Časť portálu [Last Minute Engineers](https://lastminuteengineers.com) venovaná konkrétne projektom a informáciám o mikrokontroléri _ESP32_.
 * [HiveMQ Web Client](http://www.hivemq.com/demos/websocket-client/) - MQTT klient vo webovom prehliadači
+* [Support for the ESP-NOW protocol](https://micropython-glenn20.readthedocs.io/en/latest/library/espnow.html) - dokumentácia pre komunikačný protokol *ESP-NOW* v jazyku *MicroPython*
 
 
 ## Licencia
 
 Uvedené dielo podlieha licencii [Creative Commons BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.cs).
+
+![cc](https://creativecommons.org/images/deed/cc_icon_white_x2.png) ![attribution](https://creativecommons.org/images/deed/attribution_icon_white_x2.png) ![nc](https://creativecommons.org/images/deed/nc_white_x2.png) ![sa](https://creativecommons.org/images/deed/sa_white_x2.png)
 
